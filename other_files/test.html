@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        
+        <title>Geneseas Buoyancy Engine</title>
+    </head>
+<body>
+    <h1>BUOYANCY ENGINE 2023-24</h1>
+
+    <div class = "time">
+        <h2 class="time_head">INPUT TIME</h2>
+
+        <div class = "input_time">
+            <input type="number" id="hour">
+            <input type="number" id="minute">
+        </div>
+    </div>
+
+    <div class = "dive_bttn">
+        <button class = "dive_label">DIVE</button>
+    </div>
+
+    <div class = "graph">
+        <h2 class = "graph">GRAPH</h2>
+        <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+
+        <script>
+        const xValues = [50,60,70,80,90,100,110,120,130,140,150];
+        const yValues = [7,8,8,9,9,9,10,11,14,14,15];
+
+        new Chart("myChart", {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: [{
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,0,255,1.0)",
+            borderColor: "rgba(0,0,255,0.1)",
+            data: yValues
+            }]
+        },
+        options: {
+            legend: {display: false},
+            scales: {
+            yAxes: [{ticks: {min: 6, max:16}}],
+            }
+        }
+        });
+        </script>
+
+    </div>
+</body>
+</html>
+
+

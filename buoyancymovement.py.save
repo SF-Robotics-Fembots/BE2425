@@ -1,0 +1,141 @@
+#!/usr/bin/python3
+
+import RPi.GPIO as GPIO
+import time
+import smbus
+import ms5837
+import sys
+import cgi
+import cgitb
+import ms5837
+import smbus
+import time
+import datetime
+import webbrowser
+
+#initializing the sensors
+sensor = ms5837.MS5837_02BA(1)
+DEBUG = 1
+
+time.sleep(2)
+
+
+motordown = 5
+motorup = 6
+switch = 21
+plunger_time = 60 #~60 seconds to bottom of syinge
+time_to_bottom = 5
+
+#set the modes for the pins
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+#pin setups
+GPIO.setup(motordown, GPIO.OUT)
+GPIO.setup(motorup, GPIO.OUT)
+GPIO.setup(switch, GPIO.IN)
+
+#initial them all to low
+GPIO.output(motorup, GPIO.LOW)
+GPIO.output(motordown, GPIO.LOW)
+
+def startup_sensor():
+	print("prep to init")
+	sensor.init()
+	time.sleep(1)
+	print("prep to read")
+	sensor.read(ms5837.OSR_256)
+	print("prep to set density")
+	sensor.setFluidDensity(ms5837.DENSITY_FRESHWATER)
+
+def collect_pressure(fil):
+	while True:
+		try:
+			sensor.read(ms5837.OSR_256)
+		except:
+			print("failed reading")
+			continue #goes back to the try. it's stubborn like that
+		readings = sensor.pressure(ms5837.UNITS_kPa)
+		now = datetime.datetime.now()
+		print(str(readings) + "   " + now.strftime("%H:%M:%S"))
+		print(str(now.strftime("%H:%M:%S") + " : " + (str(readings)) + " kPa"), file=f)
+		break
+
+def plunger_up():
+	while GPIO.input(switch) == True:
+		GPIO.output(motorup, GPIO.HIGH)
+	GPIO.output(motorup, GPIO.LOW)
+
+def plunger_down():
+    if GPIO.input(switch) == False: #check if it's true by software protection
+        GPIO.output(motordown, GPIO.HIGH)
+        time.sleep(plunger_time)
+        GPIO.output(motordown, GPIO.LOW)
+
+def calibration():
+    print("calibration\n")
+    plunger_up()
+    time.sleep(2)
+    plunger_down()
+
+def be_down():
+	plunger_up()
+    #not inclusive of the last second
+	for descend_time in range(time_to_bottom):
+		if descend_time % 5 == 0:
+			collect_pressure()
+	time.sleep(1)
+
+
+def be_up():
+     plunger_down()
+     time.sleep(time_to_bottom)
+
+
+def be_main():
+     calibration()
+     
+
+def be_dive():
+     print("be dive\n")
+     be_down()
+     be_up()
+     webbrower.open('192.168.42.10/index.html')
+
+
+#running main function
+#be_main()
+#if sys.argv[1] == "calibrate": calibration()
+#if sys.argv[1] == "dive": be_dive()
+
+
+print("Content-type:text/html\r\n\r\n")
+print("")
+print("Hello everyone")
+form = cgi.FieldStorage()
+print(form)
+
+#startup sensor
+startup_success = 0
+while startup_success == 0:
+	try:
+		startup_sensor()
+	except:
+		print("                 ***FAILED STARTUP***")
+		pass
+	else:
+		startup_success = 1
+		time.sleep(0.5)
+
+
+if "dive" in form: 
+	print("diving")
+	f = open("pressure_test.txt", 'w')
+	be_dive()
+if "calibrate" in form: 
+	print("Calibrating")
+	calibration()
+
+
+
+

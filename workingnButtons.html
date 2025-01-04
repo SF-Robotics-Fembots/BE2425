@@ -1,0 +1,30 @@
+<head>
+<body>
+<form action="getData.py" method="post">
+   <!-- FirstName: <input type="text" name="first_name">
+   LastName: <input type="text" name="last_name">-->
+   <input type="submit" value="go">
+</form>
+
+<form action="buoyancymovement.py" method="post">
+   <input type="submit" value="Dive" name="dive">
+</form>
+
+<form action="buoyancymovement.py" method="post">
+   <input type="submit" value="Calibrate" name="calibrate">
+</form>
+
+ <script>
+  function getCurrentTime() {
+	var now = new Date();
+	var current_time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+	document.getElementById("current-time").innerHTML = "Current Time: " + current_time;
+  }
+</script> 
+<button onclick="getCurrentTime()">Get Current Time</button>
+<p id="current-time"></p>
+
+ 
+
+</body>
+</head>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+        <link rel = "stylesheet" href="bestyle.css">
+        <!-- linking pyScript to run python functions--> 
+        <link rel="stylesheet" href="/pyscript/core.css">
+        <script type="module" src="/pyscript/core.js"></script>
+        <title>Geneseas Buoyancy Engine</title>
+	<html lang="en">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+
+<body>    
+    <h1 class = "web_title">BUOYANCY ENGINE 2023-24</h1>
+    
+   <title>Current Time</title>
+
+<script>
+function getCurrentTime() {
+	var now = new Date();
+	var current_time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+	document.getElementById("current-time").innerHTML = "Current Time: " + current_time;
+}
+</script>
+
+<!-- test -->
+<div class = "collectBtn">
+	<form action="buoyancymovement.py" method="post">
+		<input type="submit" value="data_collect" name="data_collect">
+	</form>
+</div>
+
+<button onclick="getCurrentTime()">Get Current Time</button>
+<p id="current-time"></p>
+
+<div class = "dive_bttn">
+	<form action="buoyancymovement.py" method="post">
+  		<input type="submit" value="Dive" name="dive">
+	</form>
+</div>
+
+
+<form action="buoyancymovement.py" method="post">
+  <input type="submit" value="Calibrate" name="calibrate">
+</form>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

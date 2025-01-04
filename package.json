@@ -1,0 +1,17 @@
+{
+  "name": "be2324",
+  "version": "1.0.0",
+  "description": "send the time to the terminal pls work",
+  "main": "bejs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "time",
+    "server",
+    "send"
+  ],
+  "author": "angelyn",
+  "license": "ISC"
+}

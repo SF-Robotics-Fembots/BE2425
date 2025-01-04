@@ -1,0 +1,96 @@
+/* 
+COLOR HEX CODES
+background - page: #F1F6FD
+background - label: #5D7090
+text - label: #F1F6FD
+button border: midnight blue
+button text: midnight blue
+*/
+
+body {
+    background-color: #F1F6FD;
+    align-items: center;
+    text-align:center;
+  }
+
+  .web_title{
+    font-family: 'Trebuchet MS', sans-serif;
+    color: midnightblue;
+    font-size: 40px;
+  }
+ .time{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+ }  
+ .header{
+    border: 2px solid #5D7090;
+    background-color: #5D7090;
+    border-radius: 5px;
+    padding-left: 7.5%;
+    padding-right: 7.5%;
+    margin-bottom: 1.5%;
+ }
+.time_head{
+  font-family: 'Trebuchet MS', sans-serif;
+  color:#F1F6FD;
+  font-size: 27px;
+  font-weight: 100;
+}
+ .input_time{
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 3%;
+ }
+
+ .input_fix{
+  margin: 5px;
+  font-size: 40px;
+  background-color: #F1F6FD;
+  border: 1.5px solid midnightblue;
+  border-radius: 5px;
+  width: 70px;
+  height: 60px;
+  color: midnightblue;
+  text-align: center;
+ }
+
+ .dive_bttn{
+  margin-top: 5%;
+ }
+ .dive_label{
+  background-color: #F1F6FD;
+  font-size: 30px;
+  padding: 3% 15%;
+  border-radius: 45px;
+  font-weight: 350;
+  border: 3px solid midnightblue;
+  color: midnightblue;
+  font-family: 'Trebuchet MS', sans-serif;
+ }
+
+ .graph{
+  margin-top: 9%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+ }
+
+ .header_graph{
+  border: 2px solid #5D7090;
+  background-color: #5D7090;
+  border-radius: 5px;
+  padding-left: 10%;
+  padding-right: 10%;
+  margin-bottom: 7%;
+ }
+ .graph_head{
+  font-size: 27px;
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #F1F6FD;
+  font-weight: 100;
+}
+
+ canvas .myChart{
+  align-self: center;
+ }

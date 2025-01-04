@@ -1,0 +1,22 @@
+import subprocess
+cmd = [ 'echo' , 'arg1' , 'arg2']
+output = subprocess.Popen( cmd, stdout=subprocess.PIPE ).communicate()[0]
+print("output")
+
+import subprocess
+import tempfile
+
+with tempfile.TemporaryFile() as tempf:
+    proc = subprocess.Popen(['echo' , 'a' , 'b'], stdout=tempf)
+    proc.wait()
+    tempf.seek(0)
+    print("tempf.read()")
+
+from subprocess import run
+output = run("pwd" , capture_output=True).stdout
+
+import os
+a = os.popen('pwd').readlines()
+
+import commands
+print ("commands.getstatusoutput('echo "test" | wc')")
