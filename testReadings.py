@@ -3,25 +3,30 @@ import smbus
 import time
 import datetime
 import threading
+import os
 
 sensor = ms5837.MS5837_02BA(1)
 DEBUG = 1
-
+global second_time
 time.sleep(2)
 counter=0
+f = open("collect_data.txt", 'w')
+os.chmod("collect_data.txt", 0o777)
+second_time = 0
+
 def startup():
-	print("prep to init")
+	#print("prep to init")
 	sensor.init()
 	time.sleep(1)
-	print("prep to read")
+	#print("prep to read")
 	sensor.read(ms5837.OSR_256)
-	print("prep to set density")
+	#print("prep to set density")
 	sensor.setFluidDensity(ms5837.DENSITY_FRESHWATER)
 
-
 def main(counter):
+	global second_time
 	startup_success = 0
-	second_time = 0
+#	second_time = 0
 	while startup_success == 0:
 		try:
 			startup()
@@ -32,9 +37,9 @@ def main(counter):
 			startup_success = 1
 			time.sleep(0.5)
 
-#	f = open("collect_all_data.txt", 'w')
+	#os.chmod("collect_data.txt", 0o777)
 
-	while second_time <= counter:
+	while second_time >= counter:
 		try:
 			sensor.read(ms5837.OSR_256)
 
@@ -64,19 +69,28 @@ def main(counter):
 #		print("first: " + depth)
 		depth =  depth * -1
 #		print("second: " + depth)
-		print(str(now.strftime("%H:%M:%S") + " : " + str(readings) + " kPa") + " : ")
-#		print("RN10" + " : " + (str(second_time)) + " : " + (str(readings)) + " : " + (str(depth)), file=f)
-		print("Depth: ", str(depth))
+#		print(str(now.strftime("%H:%M:%S") + " : " + str(readings) + " kPa") + " : ")
+#		print("Depth: ", str(depth))
 #		print(str(now.strftime("%H:%M:%S")))
+#		print("first time: ", second_time)
 		second_time = second_time + 5
+		print("RN08" + " : " + (str(second_time)) + " : " + (str(readings)) + " : " + (str(depth)), file=f)
+		print("RN08" + " : " + (str(second_time)) + " : " + (str(readings)) + " : " + (str(depth)))
+#		print("second time: ", second_time)
 		#f.close()
-		time.sleep(1)
-
+		time.sleep(5)
 
 
 #if "__name__" == "__main__":
+
 #	startup()
-#	main()
-	startup()
+#	while True:
+#		main(counter)
+#	startup()
+
+#for i in range(counter):
+#	counter = 5
+#	main(5)
+
 while True:
 	main(counter)

@@ -2,8 +2,9 @@
 <html>
 <head>
   	<script type= "text/javascript" src="chart.umd.js"></script>
+<!--    <script src="../static/Chart.min.js"> </script> -->
         <link rel = "stylesheet" href="bestyle.css" type="text/css">
-<!--	<script src="bejs.js"></script>  -->
+	<script src="js/chart.min.js"></script>
         <title>Geneseas Buoyancy Engine</title>
 	<html lang="en">
 	<meta charset="UTF-8">
@@ -12,7 +13,7 @@
 </head>
 
 <body>
-    <h1 class = "web_title">GENESEAS (RN10) BUOYANCY ENGINE 2024-25</h1>
+    <h1 class = "web_title">GENESEAS (RN08) BUOYANCY ENGINE 2024-25</h1>
    <title>Current Time</title>
 
 
@@ -31,17 +32,21 @@
 
 <div class = "battery_bttn">
 	<form action="buoyancymovement.py" method="post">
-		<INPUT TYPE="submit" value="Battery" name="battery">
+		<INPUT TYPE="submit" value="battery" name="battery">
 	</form>
 </div>
 
 <?php
-$file = fopen("collect_all_data.txt", "rb");
+
+$file = fopen("collect_data.txt", "rb");
 
 if(!$file){
         echo "file cant open";
         exit;
 }
+
+
+      
 
 echo <<<EOF
 <style>
@@ -64,16 +69,23 @@ echo '<tr><th>COMPANY NAME</th><th>TIME</th><th>PRESSURE</th><th>DEPTH</th></tr>
 $depth = array();
 $time = array();
 
-while(!feof($file)){
-        $line = fgets($file);
-	$parts = explode(" : ", $line);
-	array_push($time, $parts[1]);
-	array_push($depth, $parts[3]);
-	echo "<tr><td height=70>$parts[0]</td><td height=70>$parts[1] s</td><td height=70>$parts[2] kPa</td><td height=70>$parts[3] m</td></tr>";
-}
-echo '</table>';
-fclose($file);
+if(flock($file, LOCK_EX)) {
 
+     while(!feof($file)){ 
+             $line = fgets($file);
+	     $parts = explode(" : ", $line);
+       	     array_push($time, $parts[1]);
+       	     array_push($depth, $parts[3]);
+	     echo "<tr><td height=70>$parts[0]</td><td height=70>$parts[1] s</td><td height=70>$parts[2] kPa</td><td height=70>$parts[3] m</td></tr>";
+             }
+             echo '</table>';
+           /*  fclose($file); */
+
+} else {
+      echo "file cant open";
+      exit;
+}
+fclose($file)
  ?>
 
 <div style="width: 100%; max-width:600px;">
@@ -118,7 +130,7 @@ fclose($file);
         </script>
 
 <form action="buoyancymovement.py" method="post">
-  <input type="submit" value="Calibrate" name="calibrate">
+  <input type="submit" value="calibrate" name="calibrate">
 </form>
 
 
@@ -135,14 +147,17 @@ fclose($file);
 
          yAxes: [{ticks: {min: 6, max:16}}], -->
 
-<!-- <script>
+<!--
+<script>
 function getCurrentTime() {
 	var now = new Date();
 	var current_time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
 	document.getElementById("current-time").innerHTML = "Current Time: " + current_time;
 }
 </script>
+-->
 
+<!--
 <div class = "collectBtn">
 	<form action="buoyancymovement.py" method="post">
 		<input type="submit" value="data_collect" name="data_collect">
@@ -159,4 +174,3 @@ function getCurrentTime() {
 
 
 -->
-

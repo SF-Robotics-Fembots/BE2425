@@ -16,12 +16,18 @@ SERVO_OFF = 150
 SERVO_UP = 200
 SERVO_DOWN = 100
 
-SYRINGE_NEUTRAL = 40
-SYRINGE_MAX = 45
+SYRINGE_NEUTRAL = 14	 #was 25 #was 16
+SYRINGE_MAX = 29 #was 44 #was 30
 
-SEC_PER_CLICKS = 2.384615
+SEC_PER_CLICK = 2.384615
 
 SERVO_CHANNEL = 0
+
+start_depth = 0
+
+p = -0.001 #was -0.02
+i = 0 #was -0.00015
+d = 0
 
 GPIO.setmode(GPIO.BCM)
 #GPIO.setup(12, GPIO.OUT)
@@ -35,6 +41,13 @@ sensor = ms5837.MS5837_02BA(1)
 # Stop Servo
 #p.start(SERVO_OFF)
 time.sleep(1)
+file = open("pidDepth.txt", "w")
+
+#with open('pidDepth.txt', 'w') as file:
+	#file.write("Error: ", (depth-target_depth))
+	#file.write("control value: ", syr_position)
+	#file.write("correction: ", pid_d)
+#	print("Error: ", depth-target_depth, "control value: ", syr_position, "correction: ", pid_d)
 
 
 def handle_signal(signum, frame):
@@ -68,6 +81,7 @@ def Go_To_Top():
         if (GPIO.input(TOP_SWITCH) == 0):
                 Set_Servo(SERVO_CHANNEL, SERVO_OFF)
                 position=0
+                return
 
         while (GPIO.input(TOP_SWITCH) == 1):
 #               print("rotate switch: ", GPIO.input(21))
@@ -81,7 +95,7 @@ def Go_To_Top():
                                         break
                 time.sleep(0.5)
         Set_Servo(SERVO_CHANNEL, SERVO_OFF) 
-#        p.ChangeDutyCycle(SERVO_OFF)
+#       p.ChangeDutyCycle(SERVO_OFF)
         position = 0
         print("top reached")
 
@@ -89,62 +103,89 @@ def Go_To_Pos(target_position):
 #code to turn on servo and fill syringe w water and stop it when switch (pin 20) is activated
         global position
         print("starting position = ", position)
-        pos_part = target_position - int(target_position)
-	target_position = int(target_position)
+        print("going to ", target_position)
+	#@pos_part = target_position - int(target_position)
+
+        if (GPIO.input(TOP_SWITCH) == 0):
+                Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+                position=0
+
         if target_position < 0:
                target_position = 0
         if target_position > SYRINGE_MAX:
-                target_position = SYRING_MEX
+                target_position = SYRING_MAX
         move_amount = target_position - position
         if target_position == 0:
                 Go_To_Top()
                 return
         if move_amount > 0:
+                #target_position = int(target_position)
                 Set_Servo(SERVO_CHANNEL, SERVO_DOWN) 
-                time.sleep(0.25)
+#                time.sleep(0.25)
 #                p.ChangeDutyCycle(SERVO_DOWN)
-                while (move_amount > 0):
+                while (move_amount >= 1):
+                        position=int(position)
                         if (GPIO.input(ROTATE_SWITCH) == 0):  #wait for click
                                 move_amount-=1 #reduce remaining amount to move by 1 rotation
                                 position+=1
                                 print("New Position = ", position, "Move Amount = ", move_amount)
                                 while(GPIO.input(ROTATE_SWITCH) == 0): #wait for unclick
-                                       time.sleep(0.1)
+                                       time.sleep(0.2)
                         time.sleep(0.3)
                 Set_Servo(SERVO_CHANNEL, SERVO_OFF)  
                 #Accounting for pid decimal
-                print("pos_part, = ", pos_part)
-                time_part = pos_part * SEC_PER_CLICK
-                Set_Servo(SERVO_CHANNEL, SERVO_DOWN)
-                wait(time_part)
-                Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+
+                pos_part=(target_position - position)
+                if (pos_part != 0):
+                     print("pos_part, = ", pos_part)
+                     time_part = pos_part * SEC_PER_CLICK
+                     Set_Servo(SERVO_CHANNEL, SERVO_DOWN)
+                     time.sleep(time_part)
+                     Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+                     position+=pos_part
 #               p.ChangeDutyCycle(SERVO_OFF)
 
         if move_amount < 0:
+                if (GPIO.input(TOP_SWITCH) == 0):
+                   Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+                   return
+
+                print("Move Amount less than 0: ", move_amount)
+                #target_position = int(target_position)
                 Set_Servo(SERVO_CHANNEL, SERVO_UP) 
                 time.sleep(0.25)
 #               p.ChangeDutyCycle(SERVO_UP)
-                while (move_amount < 0):
+                while (move_amount <= -1):
+                        position=int(position)
                         if (GPIO.input(ROTATE_SWITCH) == 0):
                                 move_amount += 1
                                 position-=1
                                 print("New Position = ", position, "Move Amount = ", move_amount)
                                 while(GPIO.input(ROTATE_SWITCH) == 0):
-                                        time.sleep(0.5)
+                                        time.sleep(0.2)
+                        time.sleep(0.3)
                 Set_Servo(SERVO_CHANNEL, SERVO_OFF) 
 
-                print("pos_part, = ", pos_part)
-                time_part = (1-pos_part) * SEC_PER_CLICK
-                Set_Servo(SERVO_CHANNEL, SERVO_UP)
-                wait(time_part)
-                Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+                if (GPIO.input(TOP_SWITCH) == 0):
+                    Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+                    return
 
+# how much micro movement
+                pos_part=(position - target_position)
+                if (pos_part != 0):
+                   #pos_part = 1-pos_part
+                   print("pos_part, = ", pos_part)
+                   Set_Servo(SERVO_CHANNEL, SERVO_UP)
+                   time.sleep(abs(pos_part * SEC_PER_CLICK))
+                   Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+                   position-=pos_part
 #                p.ChangeDutyCycle(SERVO_OFF)
-        print("position reached")
+        print("position reached: ", position)
         return
 
 def Go_To_Depth(target_depth):
-	pid = PID(-0.001, -0.002, -0.001, setpoint = target_depth*100)
+	global file
+	pid = PID(p, i, d, setpoint = target_depth*100)
 	pid.sample_time = 1
 	print("Going to ", target_depth, "M")
 	# Read first depth
@@ -153,19 +194,33 @@ def Go_To_Depth(target_depth):
 	print("Depth = ", depth)
 	pid_d = pid(depth)
 	print("p: ", pid_d)
-	syr_position = round(pid_d + SYRINGE_NEUTRAL, 1)
+	syr_position = pid_d + SYRINGE_NEUTRAL
+	#f = open("pidDepth.txt", 'w')
 	while (1):
-		print("going to pos: ", syr_position)
+		if TOP_SWITCH == 0:
+			syr_position = 0
+			print("Cannot move past 0")
+			#return
+		print("-------------------going to pos: ", syr_position)
 		Go_To_Pos(syr_position)
+		if syr_position >= SYRINGE_MAX:
+			syr_position = SYRING_MAX
+			print("Cannot move past max")
+			return
 		time.sleep(0.1)
 		sensor.read(ms5837.OSR_256)
 		depth = sensor.depth() * 100
 		pid_d = pid(depth)
 		print("pid_d = ", pid_d)
-		syr_position = round(pid_d + SYRINGE_NEUTRAL, 1) #round one decimal
 
+		print("Error: ", depth-target_depth, "control value: ", syr_position, "correction: ", pid_d, "depth: ")
+		print("Error: ", depth-target_depth, "control value: ", syr_position, "correction: ", pid_d, "depth: ", depth, file=file)
+
+
+		syr_position = pid_d + SYRINGE_NEUTRAL
+	#	print("depth =" + (str(depth)), file=f)
+	#	f.close
 		print("depth = ", depth, "syr_pos = ", syr_position)
-
 def init_html():
 
         #ORIGINAL CODE FROM 2023-24 below
@@ -175,6 +230,32 @@ def init_html():
         print("""<p><a href="http://192.168.42.10/index.php">Go_Back_to_Data</a></p>"""
 )
 
+def find_neutral():
+	global SYRINGE_NEUTRAL
+	global position
+	global start_depth
+
+	sensor.read(ms5837.OSR_256)
+	start_depth = sensor.depth() * 100
+
+	depth = sensor.depth() * 100
+	while(depth - start_depth < 2):
+		if (GPIO.input(TOP_SWITCH) == 0):
+			Set_Servo(SERVO_CHANNEL, SERVO_OFF)
+			return
+
+		print("Finding neutral from ", position)
+		Set_Servo(SERVO_CHANNEL, SERVO_UP) 
+		time.sleep(.25 * SEC_PER_CLICK)
+		position+=0.25
+		Set_Servo(SERVO_CHANNEL, SERVO_OFF) 
+		time.sleep(0.5)
+		sensor.read(ms5837.OSR_256)
+		depth = sensor.depth() * 100
+		print("Finding Neutral - ", depth, "cm")
+	print("Neutal syringe is ", position)
+	SYRINGE_NEUTRAL = position + 0.5
+
 
 if __name__ == "__main__":
 	init_html()
@@ -182,7 +263,8 @@ if __name__ == "__main__":
 	Go_To_Top()
 	Go_To_Pos(SYRINGE_MAX)
 	inp = input("Press Enter to Continue")
-	Go_To_Pos(SYRINGE_NEUTRAL)
+	Go_To_Pos(SYRINGE_NEUTRAL+5)
+	find_neutral()
 	Go_To_Depth(1)
 	GPIO.cleanup()
 

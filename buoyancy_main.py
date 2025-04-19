@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+print("Content-Type: text/html\n\n")
 import sys
 import RPi.GPIO as GPIO
 import time
@@ -7,8 +8,13 @@ import ms5837
 import smbus
 import datetime
 import threading
-
-
+import cgi
+import cgitb
+import Adafruit_MCP3008
+from gpiozero import MCP3008
+#import testReadings
+#import testReadings
+'''
 TOP_SWITCH = 21
 ROTATE_SWITCH = 6
 SERVO_OFF = 7
@@ -121,6 +127,25 @@ def Go_To_Depth(target_depth):
 		print("pid_d = ", pid_d)
 		syr_position = round(pid_d + SYRINGE_NEUTRAL, 0)
 		print("depth = ", depth, "syr_pos = ", syr_position)
+'''
+
+form = cgi.FieldStorage()
+
+def get_battery():
+	pot = MCP3008(0)
+	new_val = pot.value*6.6
+	print(new_val)
+	k = open("battery_check.txt", 'w')
+	print((new_val), file=k)
+
+def runbe():
+	if "battery" in form:
+		get_battery()
+#	if "sample" in form:
+#		print("sampling")
+#		dataCode = threading.Thread(target=testReadings.main, args = (4,))
+#		dataCode.start()
+
 
 def init_html():
 
@@ -132,13 +157,15 @@ def init_html():
 )
 
 
+
 if __name__ == "__main__":
-	init_html()
-	startup()
-	Go_To_Top()
-	Go_To_Pos(SYRINGE_MAX)
-	inp = input("Press Enter to Continue")
-	Go_To_Pos(SYRINGE_NEUTRAL)
-	Go_To_Depth(1.5)
-	GPIO.cleanup()
+#	init_html()
+#	startup()
+#	Go_To_Top()
+#	Go_To_Pos(SYRINGE_MAX)
+#	inp = input("Press Enter to Continue")
+#	Go_To_Pos(SYRINGE_NEUTRAL)
+#	Go_To_Depth(1.5)
+	runbe()
+#	GPIO.cleanup()
 

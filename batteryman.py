@@ -1,6 +1,5 @@
 import Adafruit_MCP3008
 from gpiozero import MCP3008
-
 def get_battery():
 	pot = MCP3008(0)
 	new_val = pot.value*6.6
@@ -8,6 +7,7 @@ def get_battery():
 	return new_val
 
 
-get_battery()
+#get_battery()
 
-
+if "battery" in form:
+	get_battery()
